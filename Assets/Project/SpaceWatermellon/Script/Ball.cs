@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
-    [SerializeField] Rigidbody2D rb;
+   // [SerializeField] Rigidbody2D rb;
 
-    private void Update()
+    private void Start()
     {
-        rb.AddForce(Vector2.right * 0.2f, ForceMode2D.Impulse);
+      //  Vector2 target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        
+       // rb.AddForce(target * 5f, ForceMode2D.Impulse);
     }
+    
 }

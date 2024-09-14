@@ -10,6 +10,8 @@ public class CreateBall : MonoBehaviour
     [SerializeField] GameObject fourth;
     [SerializeField] GameObject fifth;
     [SerializeField] GameObject sixth;
+
+    [SerializeField] Transform target;
     
 
     private void Update()
@@ -21,6 +23,12 @@ public class CreateBall : MonoBehaviour
     }
     private void shoot(GameObject prefab)
     {
-        Instantiate(prefab,transform.position,transform.rotation);
+        float z = transform.rotation.eulerAngles.z;
+        Vector2 direction = new Vector2(Mathf.Cos(z * Mathf.Deg2Rad), Mathf.Sin(z * Mathf.Deg2Rad));
+        
+        GameObject ball = Instantiate(prefab,target.position,target.rotation);
+        Rigidbody2D rbball = ball.GetComponent<Rigidbody2D>();
+        rbball.AddForce(direction * 5f, ForceMode2D.Impulse);
+
     }
 }
