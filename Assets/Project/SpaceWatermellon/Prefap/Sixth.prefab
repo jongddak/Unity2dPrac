@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 4795041595660771444}
   m_Layer: 0
   m_Name: Sixth
-  m_TagString: Untagged
+  m_TagString: sixth
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -120,7 +120,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b83f9d5657969764ea1744877525149e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rb: {fileID: 5320556720591643241}
+  prepabs:
+  - {fileID: 1605572871271155804}
 --- !u!58 &4795041595660771444
 CircleCollider2D:
   m_ObjectHideFlags: 0

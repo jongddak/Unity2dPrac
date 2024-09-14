@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -1080994625836065771}
   m_Layer: 0
   m_Name: Third
-  m_TagString: Untagged
+  m_TagString: third
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -120,7 +120,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b83f9d5657969764ea1744877525149e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rb: {fileID: -9153247348790367325}
+  prepabs:
+  - {fileID: 7275500605855325608, guid: e8a9a7d1444689049b0245f7a68c18a1, type: 3}
 --- !u!58 &-1080994625836065771
 CircleCollider2D:
   m_ObjectHideFlags: 0

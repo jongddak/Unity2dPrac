@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7538702498355830516}
   m_Layer: 0
   m_Name: Forth
-  m_TagString: Untagged
+  m_TagString: forth
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -120,7 +120,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b83f9d5657969764ea1744877525149e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rb: {fileID: -13911517456823999}
+  prepabs:
+  - {fileID: 2094372905578009554, guid: 14e75152dcc59664cb2613eb91214dd2, type: 3}
 --- !u!58 &7538702498355830516
 CircleCollider2D:
   m_ObjectHideFlags: 0

@@ -4,13 +4,34 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
-   // [SerializeField] Rigidbody2D rb;
+    [SerializeField] GameObject[] prepabs;
 
-    private void Start()
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-      //  Vector2 target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        
-       // rb.AddForce(target * 5f, ForceMode2D.Impulse);
+        if (collision.gameObject.tag != "sixth")
+        {
+            // 태그가 같은지 확인
+            if (collision.gameObject.CompareTag(gameObject.tag))
+            {
+
+                if (gameObject.GetInstanceID() < collision.gameObject.GetInstanceID())
+                {
+                    // 충돌한 위치에서 새로운 오브젝트 생성
+                    Vector3 collisionPosition = collision.transform.position;
+
+                    // 충돌한 두 오브젝트 제거
+                    Destroy(collision.gameObject);
+                    Destroy(gameObject);
+
+                    // 새로운 오브젝트 생성
+                    Instantiate(prepabs[0], collisionPosition, Quaternion.identity);
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("완성");
+        }
     }
-    
+
 }
