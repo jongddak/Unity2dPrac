@@ -10,11 +10,15 @@ TagManager:
   - forth
   - fifth
   - sixth
+  - Ground
+  - starttxt
+  - restarttxt
+  - cleartxt
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
   - 
