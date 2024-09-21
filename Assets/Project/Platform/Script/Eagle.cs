@@ -1,14 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Eagle : MonoBehaviour
-{
+{   
     public enum State { Idle, Trace, Return, Attack, Dead, Size }  // 열거형 끝에 Size 를 두면 열거형의 크기를 체크 가능 
-    private State curstate = State.Idle;
+
 
     private BaseState[] States = new BaseState[(int)State.Size];  // 열거형 크기만큼의 배열 생성 
 
+    [SerializeField] State curstate;
 
     [SerializeField] GameObject Player;
     [SerializeField] float MoveSpeed;
@@ -18,14 +21,24 @@ public class Eagle : MonoBehaviour
     [SerializeField] float traceRange;
     [SerializeField] float attackRange;
 
+    [SerializeField] Animator animator;
+    private static int idel = Animator.StringToHash("Idel");
+    private static int atk = Animator.StringToHash("Atk");
+
+    public UnityEvent playerOnHit;
+
+    private bool isOnAttack = false;
 
     private void Awake()
-    {
+    {   
+        
         States[(int)State.Idle] = new IdelState(this);   // 상태 배열 초기화 
         States[(int)State.Trace] = new TraceState(this);
         States[(int)State.Return] = new ReturnState(this);
         States[(int)State.Attack] = new AttackState(this);
         States[(int)State.Dead] = new DeadState(this);
+
+        curstate = State.Idle;
     }
 
     private void Start()
@@ -42,14 +55,37 @@ public class Eagle : MonoBehaviour
     }
     private void Update()
     {
+        
         States[(int)curstate].Update();   // 열거형 번호(배열기준)에 맞는 상태를 실행 , 현재 상태만 실행 
-    }
 
+    }
+    public void OnEagleDead() 
+    {
+        ChangeState(State.Dead);
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+      
+    }
     public void ChangeState(State state)   // 현재 상태에서 나가고 다른 상태에 진입 
     {
         States[(int)curstate].Exit();
         curstate = state;
         States[(int)curstate].Enter();
+    }
+    public void onAttack() 
+    {
+        StartCoroutine(Attack());
+    }
+    IEnumerator Attack()
+    {
+        isOnAttack = true;
+        Debug.Log("공격!");
+        animator.Play(atk);
+        playerOnHit?.Invoke();
+        yield return new WaitForSeconds(1f); 
+        isOnAttack = false;
+        animator.Play(idel);
     }
     private class EagleState : BaseState  // 상태별 가지고 있는 공통 기능 구현용 
     {
@@ -68,16 +104,20 @@ public class Eagle : MonoBehaviour
         }
         public override void Update()
         {
-          if (Vector2.Distance(eagle.transform.position, eagle.Player.transform.position) < eagle.traceRange) 
+            if (Vector2.Distance(eagle.transform.position, eagle.Player.transform.position) < eagle.traceRange)
             {
                 eagle.ChangeState(State.Trace);
+            }
+            else if (Vector2.Distance(eagle.transform.position, eagle.Player.transform.position) > eagle.traceRange)
+            {
+                eagle.ChangeState(State.Return);
             }
         }
         // 상속에서 버추얼로 작성해서 할게 없다면 작성 안하면 됨 
 
     }
- 
-    private class TraceState : EagleState 
+
+    private class TraceState : EagleState
     {
         private GameObject Player;
         private float MoveSpeed;
@@ -92,61 +132,64 @@ public class Eagle : MonoBehaviour
 
         public override void Update()
         {
-         
-           eagle.transform.position = Vector2.MoveTowards(eagle.transform.position, eagle.Player.transform.position, eagle.MoveSpeed * Time.deltaTime);
 
-           // 다른 상태로 전환
-           if (Vector2.Distance(eagle.transform.position, eagle.Player.transform.position) > eagle.traceRange)
-           {
+            eagle.transform.position = Vector2.MoveTowards(eagle.transform.position, eagle.Player.transform.position, eagle.MoveSpeed * Time.deltaTime);
+
+            // 다른 상태로 전환
+            if (Vector2.Distance(eagle.transform.position, eagle.Player.transform.position) > eagle.traceRange)
+            {
                 eagle.ChangeState(State.Idle);
-           }
-           else if (Vector2.Distance(eagle.transform.position,eagle.Player.transform.position) < eagle.attackRange)
-           {
+            }
+            else if (Vector2.Distance(eagle.transform.position, eagle.Player.transform.position) < eagle.attackRange)
+            {
                 eagle.ChangeState(State.Attack);
-           }
+            }
         }
     }
-   
-    private class ReturnState : EagleState 
+
+    private class ReturnState : EagleState
     {
         public ReturnState(Eagle eagle) : base(eagle)
         {
         }
-
-        public override void Enter()
-        {
-
-        }
         public override void Update()
         {
+            eagle.transform.position = Vector2.MoveTowards(eagle.transform.position, eagle.startPos, eagle.MoveSpeed * Time.deltaTime);
 
+            if (Vector2.Distance(eagle.transform.position, eagle.startPos) == 0)
+            {
+                eagle.ChangeState(State.Idle);
+            }
         }
-        public override void Exit()
-        {
 
-        }
     }
-   
-    private class AttackState : EagleState 
+
+    private class AttackState : EagleState
     {
+       
+
+    
         public AttackState(Eagle eagle) : base(eagle)
         {
         }
 
-        public override void Enter()
-        {
-
-        }
         public override void Update()
         {
+            // 공격 애니메이션 재생 , 공격
+            if (eagle.isOnAttack == false)
+            {
+                eagle.onAttack();
+            }
 
-        }
-        public override void Exit()
-        {
 
+            if (Vector2.Distance(eagle.transform.position, eagle.Player.transform.position) > eagle.attackRange)
+            {
+                eagle.ChangeState(State.Trace);
+            }
         }
     }
-   
+
+
     private class DeadState : EagleState
     {
         public DeadState(Eagle eagle) : base(eagle)
@@ -155,16 +198,9 @@ public class Eagle : MonoBehaviour
 
         public override void Enter()
         {
-
+            Destroy(eagle.gameObject);
         }
-        public override void Update()
-        {
-
-        }
-        public override void Exit()
-        {
-
-        }
+        
     }
 
 

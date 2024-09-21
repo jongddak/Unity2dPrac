@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor.U2D.Path.GUIFramework;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class StatePlayerMover : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class StatePlayerMover : MonoBehaviour
     private BaseState[] States = new BaseState[(int)moverState.Size];
 
     [SerializeField] moverState curplayerState;
-
+    [SerializeField] Slider slider;
     [SerializeField] Rigidbody2D rb2d;
     [SerializeField] float movePower;
     [SerializeField] float maxSpeed;
@@ -29,6 +30,8 @@ public class StatePlayerMover : MonoBehaviour
 
     public UnityEvent OnDead;
 
+    public UnityEvent OnEagleStep;
+
 
     private static int idel = Animator.StringToHash("Idel");
     private static int jump = Animator.StringToHash("Jump");
@@ -38,6 +41,7 @@ public class StatePlayerMover : MonoBehaviour
     private int CurAnim;
 
     private bool isGrounded = false;
+    private bool underMonster = false;
 
     //  각 상태마다 애니메이션 재생 
     // 아이들 업데이트에선 애니메이션만 
@@ -52,7 +56,11 @@ public class StatePlayerMover : MonoBehaviour
 
         curplayerState = moverState.Idle;
 
-        Hp = 1;
+        Hp = 3;
+        slider.maxValue = 3;
+        slider.minValue = 0;
+        slider.value = 3;
+
     }
     private void Start()
     {
@@ -64,7 +72,7 @@ public class StatePlayerMover : MonoBehaviour
         States[(int)curplayerState].Update();
         GroundCheck();
         AnimPlayer();
-
+        stepMob();
         if (Hp == 0) 
         {
             ChangemoverState(moverState.Dead);
@@ -88,6 +96,15 @@ public class StatePlayerMover : MonoBehaviour
         {
             isGrounded = true;
             Debug.Log("점프가능");
+            if (hit.collider.tag == "Mob")
+            {
+                underMonster = true;
+                Debug.Log("몬스터 밟기 가능");
+            }
+            else 
+            {
+                underMonster = false;
+            }
 
         }
         else
@@ -95,7 +112,17 @@ public class StatePlayerMover : MonoBehaviour
             isGrounded = false;
             Debug.Log("불가능");
         }
+ 
     }
+
+    public void stepMob() 
+    {
+        if (underMonster == true) 
+        {
+            OnEagleStep?.Invoke();
+        }
+    }
+
     private void AnimPlayer()    // 현재 상태를 매개변수로 바꿀까?
     {
         int temp;
@@ -125,6 +152,18 @@ public class StatePlayerMover : MonoBehaviour
             CurAnim = temp;
             animator.Play(CurAnim);
         }
+    }
+    public void Heal() 
+    {
+        Debug.Log("체력 1회복");
+        Hp += 1;
+        slider.value += 1;
+    }
+    public void TakeHit() 
+    {
+        Debug.Log("몬스터에게 맞음!");
+        Hp -= 1;
+        slider.value -= 1;
     }
     private class PlayerState : BaseState
     {
@@ -229,7 +268,7 @@ public class StatePlayerMover : MonoBehaviour
         {
             player.OnDead?.Invoke();
             Destroy(player.gameObject);
-            // 죽는 애니메이션 추가하면 좋을듯
+            
         }
     }
 
